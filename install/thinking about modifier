@@ -1,0 +1,24 @@
+- select and deselect modules based on what's installed
+	(give friendly message explaining what will happen!!!)
+
+- disable uninstalled modules (don't uninstall)
+
+- run installer for modules that are to be installed - if they require another module, we will have to ask for it
+	(maybe sharedinfo needs to become a function?)
+	This is a real problem: lets say that usage is installed and now we add reports.
+	Here is reports' list of dependencies:
+	["reports"]=>
+	array(6) {
+	  [0]=>
+	  string(8) "db_tools"
+	  [1]=>
+	  string(32) "have_read_write_access_to_config"
+	  [2]=>
+	  string(14) "modules_to_use"
+	  [3]=>
+	  string(5) "usage"
+	  [4]=>
+	  string(20) "have_default_db_user"
+	  [5]=>
+	  string(17) "some_kind_of_auth"
+	}

@@ -129,7 +129,7 @@
 		?>
 	</section>
 
-	<footer><?php echo _("Powered by");?><img src="images/logo-coral.jpg" /></footer>
+	<footer><?php echo _("Powered by");?><img src="images/logo-coral.jpg" /><a href="install/modify.php">modify</a></footer>
 
 	<script type="text/javascript">
 		/*

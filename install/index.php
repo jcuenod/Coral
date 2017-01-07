@@ -174,9 +174,16 @@ function do_upgrade($version)
 	run_loop($INSTALLATION_VERSIONS[++$current_version_index]);
 }
 
+function do_modify()
+{
+	require_once "installer.php";
+	run_loop(Installer::VERSION_STRING_MODIFY);
+}
 
 $CURRENT_VERSION = is_installed();
-if ($CURRENT_VERSION !== $INSTALLATION_VERSION || !empty($_SESSION["run_loop_version"]))
+if ($CURRENT_VERSION !== $INSTALLATION_VERSION ||
+	!empty($_SESSION["run_loop_version"]) ||
+	(isset($_SESSION["MODIFY_INSTALLATION_CLICKED"]) && $_SESSION["MODIFY_INSTALLATION_CLICKED"]))
 {
 	make_sure_template_is_drawn();
 	require_once "test_results_yielder.php";
@@ -190,7 +197,7 @@ if ($CURRENT_VERSION !== $INSTALLATION_VERSION || !empty($_SESSION["run_loop_ver
 		do_install();
 		exit();
 	}
-	else
+	else if ($CURRENT_VERSION != $INSTALLATION_VERSION)
 	{
 		$return = new stdClass();
 		$return->messages = [];
@@ -211,6 +218,15 @@ if ($CURRENT_VERSION !== $INSTALLATION_VERSION || !empty($_SESSION["run_loop_ver
 		// Do upgrade
 		do_upgrade($CURRENT_VERSION);
 		exit();
+	}
+	else if (isset($_SESSION["MODIFY_INSTALLATION_CLICKED"]) && $_SESSION["MODIFY_INSTALLATION_CLICKED"])
+	{
+		do_modify();
+		exit();
+	}
+	else
+	{
+		throw new Exception("It should be impossible to get here... Sorry :()", 666);
 	}
 }
 

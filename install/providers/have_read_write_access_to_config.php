@@ -21,7 +21,7 @@ function register_have_read_write_access_to_config_provider()
 					$return->yield->title = _('Trying to Read & Write Configuration Files');
 
 					$return->success = true;
-
+					var_dump($shared_module_info["dependencies"]);
 					$config_files = [];
 					foreach ($shared_module_info["modules_to_use"]["useModule"] as $key => $value) {
 						if ($value &&
