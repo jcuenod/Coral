@@ -20,17 +20,20 @@
 
 include_once 'directory.php';
 
-function escape_csv($value) {
-  // replace \n with \r\n
-  $value = preg_replace("/(?<!\r)\n/", "\r\n", $value);
-  // escape quotes
-  $value = str_replace('"', '""', $value);
-  return '"'.$value.'"';
+function escape_csv($fields)
+{
+  $f = fopen('php://memory', 'r+');
+  if (fputcsv($f, $fields) === false) {
+    $failure_string = "Failed to generate csv with row\n".var_export($fields, true);
+    throw new Exception($failure_string, 1);
+  }
+  rewind($f);
+  $csv_line = stream_get_contents($f);
+  return rtrim($csv_line);
 }
 
 function array_to_csv_row($array) {
-  $escaped_array = array_map("escape_csv", $array);
-  return implode(",",$escaped_array)."\r\n";
+  return escape_csv($array)."\r\n";
 }
 
 $queryDetails = Resource::getSearchDetails();
@@ -42,7 +45,6 @@ $orderBy = $queryDetails["order"];
 $resourceObj = new Resource();
 $resourceArray = array();
 $resourceArray = $resourceObj->export($whereAdd, $orderBy);
-
 
 
 $replace = array("/", "-");
@@ -105,21 +107,22 @@ $columnHeaders = array(
   _("Catalog Record Source URL"),
   _("Catalog Records Available"),
   _("Catalog Records Loaded"),
-  _("OCLC Holdings Updated")
+  _("OCLC Holdings Updated"),
+  _("Notes")
 );
 
-echo array_to_csv_row(array(_("Resource Record Export") . " " . format_date( date( 'Y-m-d' ))));
+echo "# " . _("Resource Record Export") . " " . format_date( date( 'Y-m-d' )) . "\r\n";
 if (!$searchDisplay) {
   $searchDisplay = array(_("All Resource Records"));
 }
-echo array_to_csv_row(array(implode('; ', $searchDisplay)));
+echo "# " . implode('; ', $searchDisplay) . "\r\n";
 echo array_to_csv_row($columnHeaders);
 
 foreach($resourceArray as $resource) {
 
-	$updateDateFormatted=normalize_date($resource['updateDate']);
+  $updateDateFormatted=normalize_date($resource['updateDate']);
   $resourceValues = array(
-	  $resource['resourceID'],
+    $resource['resourceID'],
     $resource['titleText'],
     $resource['resourceType'],
     $resource['resourceFormat'],
@@ -171,9 +174,10 @@ foreach($resourceArray as $resource) {
     $resource['bibSourceURL'],
     $resource['numberRecordsAvailable'],
     $resource['numberRecordsLoaded'],
-    ($resource['hasOclcHoldings'] ? 'Y' : 'N')
+    ($resource['hasOclcHoldings'] ? 'Y' : 'N'),
+    $resource['notes']
   );
 
-	echo array_to_csv_row($resourceValues);
+  echo array_to_csv_row($resourceValues);
 }
 ?>
