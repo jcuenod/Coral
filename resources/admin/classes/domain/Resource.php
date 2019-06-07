@@ -973,40 +973,7 @@ EOF;
     $notesJoinAdd = "";
     if ($SELECT_NOTES) {
       $notesSelectAdd = "  Notes.notes_json notes,";
-//       $notesJoinAdd = $SELECT_NOTES ? <<<EOF
-//   LEFT JOIN (
-//     SELECT
-//       resourceID,
-//       CONCAT(
-//         '[',
-//         GROUP_CONCAT(
-//           JSON_OBJECT(
-//             'note_type', shortName,
-//             'tab_name', tabName,
-//             'note_text', noteText,
-//             'update_login_id', updateLoginID,
-//             'update_date', updateDate
-//           )
-//         ),
-//         ']'
-//       ) AS notes_json
-//     FROM (
-//       SELECT
-//         entityID as resourceID,
-//         NT.shortName,
-//         RN.tabName,
-//         RN.noteText,
-//         RN.updateLoginID,
-//         RN.updateDate
-//       FROM ResourceNote RN
-//       LEFT JOIN NoteType NT ON RN.entityID = NT.noteTypeID
-//     ) t
-//     GROUP BY resourceID
-//   ) Notes ON Notes.resourceID = R.resourceID
-// EOF
-
-
-$notesJoinAdd = $SELECT_NOTES ? <<<EOF
+      $notesJoinAdd = $SELECT_NOTES ? <<<EOF
   LEFT JOIN (
     SELECT
       entityID as resourceID,
