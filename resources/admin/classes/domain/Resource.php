@@ -980,18 +980,19 @@ EOF;
       CONCAT(
         '[',
         GROUP_CONCAT(
-          JSON_OBJECT(
-            'note_type', NT.shortName,
-            'tab_name', RN.tabName,
-            'note_text', RN.noteText,
-            'update_login_id', RN.updateLoginID,
-            'update_date', RN.updateDate
+          CONCAT(
+            '{\n  note_type:', QUOTE(NT.shortName),
+            ',\n  tab_name:', QUOTE(RN.tabName),
+            ',\n  note_text:', QUOTE(RN.noteText),
+            ',\n  update_login_id:', QUOTE(RN.updateLoginID),
+            ',\n  update_date:', QUOTE(RN.updateDate),
+            '\n}'
           ) SEPARATOR ',\n'
         ),
         ']'
       ) AS notes_json
     FROM ResourceNote RN
-    LEFT JOIN NoteType NT ON RN.entityID = NT.noteTypeID
+    LEFT JOIN NoteType NT ON RN.noteTypeID = NT.noteTypeID
     GROUP BY entityID
   ) Notes ON Notes.resourceID = R.resourceID
 EOF
