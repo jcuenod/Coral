@@ -795,8 +795,16 @@ EOF;
       $select = "SELECT COUNT(DISTINCT R.resourceID) count";
       $groupBy = "";
     } else {
-      $select = "SELECT R.resourceID, R.titleText, GROUP_CONCAT(DISTINCT AT.shortName SEPARATOR ' / ') as acquisitionType, R.createLoginID, CU.firstName, CU.lastName, R.createDate, S.shortName status,
-            GROUP_CONCAT(DISTINCT A.shortName, I.isbnOrIssn ORDER BY A.shortName DESC SEPARATOR '<br />') aliases";
+      $select = "SELECT
+                  R.resourceID,
+                  R.titleText,
+                  GROUP_CONCAT(DISTINCT AT.shortName SEPARATOR ' / ') as acquisitionType,
+                  R.createLoginID,
+                  CU.firstName,
+                  CU.lastName,
+                  R.createDate,
+                  S.shortName status,
+                  GROUP_CONCAT(DISTINCT A.shortName, I.isbnOrIssn ORDER BY A.shortName DESC SEPARATOR '<br />') aliases";
       $groupBy = "GROUP BY R.resourceID";
     }
 
@@ -820,8 +828,8 @@ EOF;
                   LEFT JOIN ResourcePurchaseSiteLink RPSL ON RA.resourceAcquisitionID = RPSL.resourceAcquisitionID
                   LEFT JOIN ResourceAuthorizedSiteLink RAUSL ON RA.resourceAcquisitionID = RAUSL.resourceAcquisitionID
                   LEFT JOIN ResourceAdministeringSiteLink RADSL ON RA.resourceAcquisitionID = RADSL.resourceAcquisitionID
-                                    LEFT JOIN ResourceNote RNA ON RA.resourceAcquisitionID = RNA.entityID
-                                    LEFT JOIN ResourceNote RNR ON R.resourceID = RNR.entityID
+                  LEFT JOIN ResourceNote RNA ON RA.resourceAcquisitionID = RNA.entityID
+                  LEFT JOIN ResourceNote RNR ON R.resourceID = RNR.entityID
                   LEFT JOIN ResourcePayment RPAY ON RA.resourceAcquisitionID = RPAY.resourceAcquisitionID
                   LEFT JOIN ResourceStep RS ON RA.resourceAcquisitionID = RS.resourceAcquisitionID
                   LEFT JOIN IsbnOrIssn I ON R.resourceID = I.resourceID
@@ -842,7 +850,7 @@ EOF;
     }
     $query = $select . "
                 FROM Resource R
-                                    LEFT JOIN ResourceAcquisition RA ON R.resourceID = RA.resourceID
+                  LEFT JOIN ResourceAcquisition RA ON R.resourceID = RA.resourceID
                   LEFT JOIN Alias A ON R.resourceID = A.resourceID
                   LEFT JOIN ResourceOrganizationLink ROL ON R.resourceID = ROL.resourceID
                   " . $orgJoinAdd . "
@@ -1004,8 +1012,9 @@ EOF
     //also add to not retrieve saved records
     $savedStatusID = intval($status->getIDFromName('saved'));
     $whereAdd[] = "R.statusID != " . $savedStatusID;
+    // $whereAdd[] = "R.resourceID IN (LIST_OF_IDS)";
 
-    $whereStatement = count($whereAdd) > 0 ? "WHERE " . implode(" AND ", $whereAdd) : "";
+    $whereStatement = "WHERE " . implode(" AND ", $whereAdd);
 
 
     //now actually execute query
