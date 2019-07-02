@@ -936,6 +936,12 @@ EOF;
   //returns array based on search for excel output (export.php)
   public function export($whereAdd, $orderBy) {
 
+    $distinct_resource_id_query = "SELECT DISTINCT(resourceID) AS resource_id FROM Resource;";
+    $distinct_resource_ids_assoc_array = $this->db->processQuery($distinct_resource_id_query, 'assoc');
+    $distinct_resource_ids = array_map(function($value) {
+      return $value["resource_id"];
+    }, $distinct_resource_ids_assoc_array);
+
     $config = new Configuration();
 
     if ($config->settings->organizationsModule == 'Y') {
@@ -1140,14 +1146,29 @@ GROUP BY
 ORDER BY
   $orderBy
 EOF;
-    $result = $this->db->processQuery(stripslashes($query), 'assoc');
 
-    $searchArray = array();
+    // This was determined by trial and error
+    $CHUNK_SIZE = 10000;
 
-    //need to do this since it could be that there's only one result and this is how the dbservice returns result
-    if (isset($result['resourceID'])) { $result = [$result]; }
-    foreach ($result as $row) {
-      array_push($searchArray, $row);
+    $searchArray = [];
+    $slice_offset = 0;
+    $resource_id_chunk = array_slice($distinct_resource_ids, $slice_offset, $CHUNK_SIZE);
+    while (count($resource_id_chunk) > 0) {
+      
+      $list_of_ids = implode(",", $resource_id_chunk);
+      $chunked_query = str_replace("LIST_OF_IDS",$list_of_ids,$query);
+      
+      $result = $this->db->processQuery(stripslashes($chunked_query), 'assoc');
+      //need to do this since it could be that there's only one result and this is how the dbservice returns result
+      if (isset($result['resourceID'])) {
+        $result = [$result];
+      }
+      foreach ($result as $row) {
+        array_push($searchArray, $row);
+      }
+
+      $slice_offset += $CHUNK_SIZE;
+      $resource_id_chunk = array_slice($distinct_resource_ids, $slice_offset, $CHUNK_SIZE);
     }
 
     return $searchArray;
