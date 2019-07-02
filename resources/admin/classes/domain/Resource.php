@@ -1075,9 +1075,10 @@ $notesSelectAdd
   GROUP_CONCAT(DISTINCT A.shortName ORDER BY A.shortName DESC SEPARATOR '; ') aliases,
   GROUP_CONCAT(DISTINCT PS.shortName ORDER BY PS.shortName DESC SEPARATOR '; ') purchasingSites,
   GROUP_CONCAT(DISTINCT AUS.shortName ORDER BY AUS.shortName DESC SEPARATOR '; ') authorizedSites,
-  GROUP_CONCAT(DISTINCT ADS.shortName ORDER BY ADS.shortName DESC SEPARATOR '; ') administeringSites,
+  GROUP_CONCAT(DISTINCT ADS.shortName ORDER BY ADS.shortName DESC SEPARATOR '; ') administeringSites
+  /*,
   GROUP_CONCAT(DISTINCT RP.titleText ORDER BY RP.titleText DESC SEPARATOR '; ') parentResources,
-  GROUP_CONCAT(DISTINCT RC.titleText ORDER BY RC.titleText DESC SEPARATOR '; ') childResources
+  GROUP_CONCAT(DISTINCT RC.titleText ORDER BY RC.titleText DESC SEPARATOR '; ') childResources */
 
 FROM Resource R
   LEFT JOIN ResourceAcquisition RA ON RA.resourceID = R.resourceID
@@ -1085,11 +1086,11 @@ FROM Resource R
   LEFT JOIN Alias A ON R.resourceID = A.resourceID
   LEFT JOIN ResourceOrganizationLink ROL ON R.resourceID = ROL.resourceID
 $orgJoinAdd
-  LEFT JOIN ResourceRelationship RRC ON RRC.relatedResourceID = R.resourceID
+  /* LEFT JOIN ResourceRelationship RRC ON RRC.relatedResourceID = R.resourceID
   LEFT JOIN ResourceRelationship RRP ON RRP.resourceID = R.resourceID
-  LEFT JOIN Resource RC ON RC.resourceID = RRC.resourceID
+  LEFT JOIN Resource RC ON RC.resourceID = RRC.resourceID */
   LEFT JOIN ResourceSubject RSUB ON R.resourceID = RSUB.resourceID
-  LEFT JOIN Resource RP ON RP.resourceID = RRP.relatedResourceID
+  /* LEFT JOIN Resource RP ON RP.resourceID = RRP.relatedResourceID */
   LEFT JOIN GeneralDetailSubjectLink GDLINK ON RSUB.generalDetailSubjectLinkID = GDLINK.generalDetailSubjectLinkID
   LEFT JOIN ResourceFormat RF ON R.resourceFormatID = RF.resourceFormatID
   LEFT JOIN ResourceType RT ON R.resourceTypeID = RT.resourceTypeID
