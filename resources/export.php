@@ -148,8 +148,8 @@ foreach($resourceArray as $resource) {
     $resource['costNote'],
     $resource['invoiceNum'],
     $resource['aliases'],
-    $resource['parentResources'],
-    $resource['childResources'],
+    (array_key_exists('parentResources', $resource) ? $resource['parentResources'] : ""),
+    (array_key_exists('childResources', $resource) ? $resource['childResources'] : ""),
     $resource['acquisitionType'],
     $resource['orderNumber'],
     $resource['systemNumber'],
@@ -175,7 +175,7 @@ foreach($resourceArray as $resource) {
     $resource['numberRecordsAvailable'],
     $resource['numberRecordsLoaded'],
     ($resource['hasOclcHoldings'] ? 'Y' : 'N'),
-    $resource['notes']
+    (array_key_exists('notes',$resource) ? $resource['notes'] : "")
   );
 
   echo array_to_csv_row($resourceValues);
