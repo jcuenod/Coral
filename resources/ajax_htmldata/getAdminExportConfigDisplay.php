@@ -1,7 +1,7 @@
 <?php
 
 $exportConfig = new ExportConfig();
-$config = $exportConfig->getConfiguration();
+$config = $exportConfig->getRawConfiguration();
 
 ?>
 <div class='adminHeader'>

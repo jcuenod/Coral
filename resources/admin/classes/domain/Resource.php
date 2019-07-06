@@ -935,6 +935,8 @@ EOF;
 
   //returns array based on search for excel output (export.php)
   public function export($whereAdd, $orderBy) {
+    $exportConfigObj = new ExportConfig();
+    $exportConfig = $exportConfigObj->getConfiguration();
 
     $distinct_resource_id_query = "SELECT DISTINCT(resourceID) AS resource_id FROM Resource;";
     $distinct_resource_ids_assoc_array = $this->db->processQuery($distinct_resource_id_query, 'assoc');
@@ -982,12 +984,15 @@ EOF;
     }
 
 
-    $SELECT_NOTES = true;
+    /*
+     *  OPTIONAL PARTS OF EXPORTER
+     */
+    // NOTES
     $notesSelectAdd = "";
     $notesJoinAdd = "";
-    if ($SELECT_NOTES) {
+    if ($exportConfig['Notes']) {
       $notesSelectAdd = "  Notes.notes_json notes,";
-      $notesJoinAdd = $SELECT_NOTES ? <<<EOF
+      $notesJoinAdd = <<<EOF
   LEFT JOIN (
     SELECT
       entityID as resourceID,
@@ -1009,9 +1014,31 @@ EOF;
     LEFT JOIN NoteType NT ON RN.noteTypeID = NT.noteTypeID
     GROUP BY entityID
   ) Notes ON Notes.resourceID = R.resourceID
-EOF
-      : "";
+EOF;
     }
+
+    // PARENT RELATIONSHIPS
+    $parentResourcesSelectAdd = "";
+    $parentResourcesJoinAdd = "";
+    if ($exportConfig['Parent Relationships']) {
+      $parentResourcesSelectAdd = "GROUP_CONCAT(DISTINCT RP.titleText ORDER BY RP.titleText DESC SEPARATOR '; ') parentResources,";
+      $parentResourcesJoinAdd = <<<EOF
+  LEFT JOIN ResourceRelationship RRP ON RRP.resourceID = R.resourceID
+  LEFT JOIN Resource RP ON RP.resourceID = RRP.relatedResourceID
+EOF;
+    }
+
+    // CHILD RELATIONSHIPS
+    $childResourcesSelectAdd = "";
+    $childResourcesJoinAdd = "";
+    if ($exportConfig['Child Relationships']) {
+      $childResourcesSelectAdd = "  GROUP_CONCAT(DISTINCT RC.titleText ORDER BY RC.titleText DESC SEPARATOR '; ') childResources,";
+      $childResourcesJoinAdd = <<<EOF
+  LEFT JOIN ResourceRelationship RRC ON RRC.relatedResourceID = R.resourceID
+  LEFT JOIN Resource RC ON RC.resourceID = RRC.resourceID
+EOF;
+    }
+
 
 
     $status = new Status();
@@ -1072,13 +1099,12 @@ SELECT
 $orgSelectAdd
 $licSelectAdd
 $notesSelectAdd
+$parentResourcesSelectAdd
+$childResourcesSelectAdd
   GROUP_CONCAT(DISTINCT A.shortName ORDER BY A.shortName DESC SEPARATOR '; ') aliases,
   GROUP_CONCAT(DISTINCT PS.shortName ORDER BY PS.shortName DESC SEPARATOR '; ') purchasingSites,
   GROUP_CONCAT(DISTINCT AUS.shortName ORDER BY AUS.shortName DESC SEPARATOR '; ') authorizedSites,
   GROUP_CONCAT(DISTINCT ADS.shortName ORDER BY ADS.shortName DESC SEPARATOR '; ') administeringSites
-  /*,
-  GROUP_CONCAT(DISTINCT RP.titleText ORDER BY RP.titleText DESC SEPARATOR '; ') parentResources,
-  GROUP_CONCAT(DISTINCT RC.titleText ORDER BY RC.titleText DESC SEPARATOR '; ') childResources */
 
 FROM Resource R
   LEFT JOIN ResourceAcquisition RA ON RA.resourceID = R.resourceID
@@ -1086,11 +1112,9 @@ FROM Resource R
   LEFT JOIN Alias A ON R.resourceID = A.resourceID
   LEFT JOIN ResourceOrganizationLink ROL ON R.resourceID = ROL.resourceID
 $orgJoinAdd
-  /* LEFT JOIN ResourceRelationship RRC ON RRC.relatedResourceID = R.resourceID
-  LEFT JOIN ResourceRelationship RRP ON RRP.resourceID = R.resourceID
-  LEFT JOIN Resource RC ON RC.resourceID = RRC.resourceID */
+$parentResourcesJoinAdd
+$childResourcesJoinAdd
   LEFT JOIN ResourceSubject RSUB ON R.resourceID = RSUB.resourceID
-  /* LEFT JOIN Resource RP ON RP.resourceID = RRP.relatedResourceID */
   LEFT JOIN GeneralDetailSubjectLink GDLINK ON RSUB.generalDetailSubjectLinkID = GDLINK.generalDetailSubjectLinkID
   LEFT JOIN ResourceFormat RF ON R.resourceFormatID = RF.resourceFormatID
   LEFT JOIN ResourceType RT ON R.resourceTypeID = RT.resourceTypeID
@@ -1155,7 +1179,7 @@ EOF;
     $slice_offset = 0;
     $resource_id_chunk = array_slice($distinct_resource_ids, $slice_offset, $CHUNK_SIZE);
     while (count($resource_id_chunk) > 0) {
-      
+
       $list_of_ids = implode(",", $resource_id_chunk);
       $chunked_query = str_replace("LIST_OF_IDS",$list_of_ids,$query);
       
