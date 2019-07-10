@@ -772,13 +772,15 @@ class Resource extends DatabaseObject {
     if ($config->settings->organizationsModule == 'Y') {
       $dbName = $config->settings->organizationsDatabaseName;
 
-      $orgJoinAdd = <<<EOF
-  LEFT JOIN $dbName.Organization O ON O.organizationID = ROL.organizationID
-  LEFT JOIN $dbName.Alias OA ON OA.organizationID = ROL.organizationID
-EOF;
+      $orgJoinAdd = "
+        LEFT JOIN ResourceOrganizationLink ROL ON R.resourceID = ROL.resourceID
+        LEFT JOIN $dbName.Organization O ON O.organizationID = ROL.organizationID
+        LEFT JOIN $dbName.Alias OA ON OA.organizationID = ROL.organizationID";
 
     }else{
-      $orgJoinAdd = "  LEFT JOIN Organization O ON O.organizationID = ROL.organizationID";
+      $orgJoinAdd = "  
+        LEFT JOIN ResourceOrganizationLink ROL ON R.resourceID = ROL.resourceID
+        LEFT JOIN Organization O ON O.organizationID = ROL.organizationID";
     }
 
     $savedStatusID = intval($status->getIDFromName('saved'));
@@ -833,10 +835,11 @@ EOF;
                   LEFT JOIN ResourcePayment RPAY ON RA.resourceAcquisitionID = RPAY.resourceAcquisitionID
                   LEFT JOIN ResourceStep RS ON RA.resourceAcquisitionID = RS.resourceAcquisitionID
                   LEFT JOIN IsbnOrIssn I ON R.resourceID = I.resourceID
+                  LEFT JOIN ResourceRelationship RRC ON RRC.relatedResourceID = R.resourceID
+                  LEFT JOIN ResourceRelationship RRP ON RRP.resourceID = R.resourceID
                   ");
 
     $additional_joins = array();
-
     foreach($conditional_joins as $join) {
       // drop the last line of $conditional_joins which is empty
       if (trim($join) == "") { break; }
@@ -848,18 +851,26 @@ EOF;
         $additional_joins[] = $join;
       }
     }
+    $organization_tables = ["ROL", "O", "OA"];
+    foreach ($organization_tables as $org_table) {
+      if (in_array($org_table, $referenced_tables)) {
+        $additional_joins[] = $orgJoinAdd;
+        break;
+      }
+    }
+    $subject_tables = ["RSUB", "GDLINK"];
+    foreach ($organization_tables as $org_table) {
+      if (in_array($org_table, $referenced_tables)) {
+        $additional_joins[] = "LEFT JOIN ResourceSubject RSUB ON R.resourceID = RSUB.resourceID
+                               LEFT JOIN GeneralDetailSubjectLink GDLINK ON RSUB.generalDetailSubjectLinkID = GDLINK.generalDetailSubjectLinkID";
+        break;
+      }
+    }
+
     $query = $select . "
                 FROM Resource R
-                  LEFT JOIN ResourceAcquisition RA ON R.resourceID = RA.resourceID
                   LEFT JOIN Alias A ON R.resourceID = A.resourceID
-                  LEFT JOIN ResourceOrganizationLink ROL ON R.resourceID = ROL.resourceID
-                  " . $orgJoinAdd . "
-                  LEFT JOIN ResourceRelationship RRC ON RRC.relatedResourceID = R.resourceID
-                  LEFT JOIN ResourceRelationship RRP ON RRP.resourceID = R.resourceID
-                  LEFT JOIN ResourceSubject RSUB ON R.resourceID = RSUB.resourceID
-                  LEFT JOIN Resource RC ON RC.resourceID = RRC.resourceID
-                  LEFT JOIN Resource RP ON RP.resourceID = RRP.relatedResourceID
-                  LEFT JOIN GeneralDetailSubjectLink GDLINK ON RSUB.generalDetailSubjectLinkID = GDLINK.generalDetailSubjectLinkID
+                  LEFT JOIN ResourceAcquisition RA ON R.resourceID = RA.resourceID
                   " . implode("\n", $additional_joins) . "
                   " . $whereStatement . "
                   " . $groupBy;
