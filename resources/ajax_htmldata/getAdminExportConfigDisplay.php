@@ -20,10 +20,11 @@ $config = $exportConfig->getRawConfiguration();
   <?php
 
   foreach($config as $option) {
+    $translatedName = _($option['shortName']);
     $checked = $option['enabled'] == 1 ? "checked=checked" : "";
     echo <<<EOF
     <tr>
-      <td>{$option['shortName']}</td>
+      <td>{$translatedName}</td>
       <td>
         <input type="checkbox" onclick='javascript:updateExportConfig({$option['ID']})' {$checked} />
       </td>
