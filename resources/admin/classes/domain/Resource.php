@@ -557,6 +557,11 @@ class Resource extends DatabaseObject {
 
 
     if ($search['parent'] != null) {
+      $relationship_options = ["RRC", "RRP"];
+      if (!in_array($search['parent'], $relationship_options)) {
+        throw new Exception("Aborting query, because of potential sql injection. Relationship types can be RRC (child) or RRP (parent).");
+        exit();
+      }
       $parentadd = "(" . $search['parent'] . ".relationshipTypeID = 1";
       $parentadd .= ")";
       $whereAdd[] = $parentadd;
