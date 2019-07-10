@@ -857,15 +857,15 @@ class Resource extends DatabaseObject {
       }
     }
     $organization_tables = ["ROL", "O", "OA"];
-    foreach ($organization_tables as $org_table) {
-      if (in_array($org_table, $referenced_tables)) {
+    foreach ($organization_tables as $table) {
+      if (in_array($table, $referenced_tables)) {
         $additional_joins[] = $orgJoinAdd;
         break;
       }
     }
     $subject_tables = ["RSUB", "GDLINK"];
-    foreach ($organization_tables as $org_table) {
-      if (in_array($org_table, $referenced_tables)) {
+    foreach ($subject_tables as $table) {
+      if (in_array($table, $referenced_tables)) {
         $additional_joins[] = "LEFT JOIN ResourceSubject RSUB ON R.resourceID = RSUB.resourceID
                                LEFT JOIN GeneralDetailSubjectLink GDLINK ON RSUB.generalDetailSubjectLinkID = GDLINK.generalDetailSubjectLinkID";
         break;
