@@ -1047,15 +1047,30 @@ EOF;
 EOF;
     }
 
+    $table_matches = [];
+
+    preg_match_all("/\b[A-Z]+(?=[.][A-Z]+)/iu", implode(" ", $whereAdd), $table_matches);
+    $tables_referenced_in_where = array_unique($table_matches[0]);
+
     // PARENT RELATIONSHIPS
     $parentResourcesSelectAdd = "";
     $parentResourcesJoinAdd = "";
     if ($exportConfig['Parent Relationships']) {
       $parentResourcesSelectAdd = "GROUP_CONCAT(DISTINCT RP.titleText ORDER BY RP.titleText DESC SEPARATOR '; ') parentResources,";
-      $parentResourcesJoinAdd = <<<EOF
+      $parentResourcesJoinAdd = "
   LEFT JOIN ResourceRelationship RRP ON RRP.resourceID = R.resourceID
-  LEFT JOIN Resource RP ON RP.resourceID = RRP.relatedResourceID
-EOF;
+  LEFT JOIN Resource RP ON RP.resourceID = RRP.relatedResourceID";
+    }
+    else {
+      $table_aliases = ["RRP", "RP"];
+      foreach ($table_aliases as $table) {
+        if (in_array($table, $tables_referenced_in_where)) {
+          $parentResourcesJoinAdd = "
+  LEFT JOIN ResourceRelationship RRP ON RRP.resourceID = R.resourceID
+  LEFT JOIN Resource RP ON RP.resourceID = RRP.relatedResourceID";
+          break;
+        }
+      }
     }
 
     // CHILD RELATIONSHIPS
@@ -1063,10 +1078,20 @@ EOF;
     $childResourcesJoinAdd = "";
     if ($exportConfig['Child Relationships']) {
       $childResourcesSelectAdd = "  GROUP_CONCAT(DISTINCT RC.titleText ORDER BY RC.titleText DESC SEPARATOR '; ') childResources,";
-      $childResourcesJoinAdd = <<<EOF
+      $childResourcesJoinAdd = "
   LEFT JOIN ResourceRelationship RRC ON RRC.relatedResourceID = R.resourceID
-  LEFT JOIN Resource RC ON RC.resourceID = RRC.resourceID
-EOF;
+  LEFT JOIN Resource RC ON RC.resourceID = RRC.resourceID";
+    }
+    else {
+      $table_aliases = ["RRC", "RC"];
+      foreach ($table_aliases as $table) {
+        if (in_array($table, $tables_referenced_in_where)) {
+          $childResourcesJoinAdd = "
+  LEFT JOIN ResourceRelationship RRC ON RRC.resourceID = R.resourceID
+  LEFT JOIN Resource RC ON RC.resourceID = RRC.relatedResourceID";
+          break;
+        }
+      }
     }
 
 
