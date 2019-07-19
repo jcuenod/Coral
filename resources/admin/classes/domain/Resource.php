@@ -819,12 +819,13 @@ class Resource extends DatabaseObject {
 
     $table_matches = array();
 
-    // Build a list of tables that are referenced by the select and where statements in order to limit the number of joins performed in the search.
-    preg_match_all("/[A-Z]+(?=[.][A-Z]+)/iu", $select, $table_matches);
-    $referenced_tables = array_unique($table_matches[0]);
+  // Build a list of tables that are referenced by the select and where statements in order to limit the number of joins performed in the search.
+  $table_matching_regex = "/\b[A-Z]+(?=[.][A-Z]+)/iu";
+    preg_match_all($table_matching_regex, $select, $table_matches);
+    $referenced_tables_select = array_unique($table_matches[0]);
 
-    preg_match_all("/[A-Z]+(?=[.][A-Z]+)/iu", $whereStatement, $table_matches);
-    $referenced_tables = array_unique(array_merge($referenced_tables, $table_matches[0]));
+    preg_match_all($table_matching_regex, $whereStatement, $table_matches);
+    $referenced_tables = array_unique(array_merge($referenced_tables_select, $table_matches[0]));
 
     // These join statements will only be included in the query if the alias is referenced by the select and/or where.
     $conditional_joins = explode("\n", "LEFT JOIN ResourceFormat RF ON R.resourceFormatID = RF.resourceFormatID
@@ -840,8 +841,6 @@ class Resource extends DatabaseObject {
                   LEFT JOIN ResourcePayment RPAY ON RA.resourceAcquisitionID = RPAY.resourceAcquisitionID
                   LEFT JOIN ResourceStep RS ON RA.resourceAcquisitionID = RS.resourceAcquisitionID
                   LEFT JOIN IsbnOrIssn I ON R.resourceID = I.resourceID
-                  LEFT JOIN ResourceRelationship RRC ON RRC.relatedResourceID = R.resourceID
-                  LEFT JOIN ResourceRelationship RRP ON RRP.resourceID = R.resourceID
                   ");
 
     $additional_joins = array();
@@ -856,19 +855,34 @@ class Resource extends DatabaseObject {
         $additional_joins[] = $join;
       }
     }
-    $organization_tables = ["ROL", "O", "OA"];
-    foreach ($organization_tables as $table) {
-      if (in_array($table, $referenced_tables)) {
-        $additional_joins[] = $orgJoinAdd;
-        break;
-      }
-    }
-    $subject_tables = ["RSUB", "GDLINK"];
-    foreach ($subject_tables as $table) {
-      if (in_array($table, $referenced_tables)) {
-        $additional_joins[] = "LEFT JOIN ResourceSubject RSUB ON R.resourceID = RSUB.resourceID
-                               LEFT JOIN GeneralDetailSubjectLink GDLINK ON RSUB.generalDetailSubjectLinkID = GDLINK.generalDetailSubjectLinkID";
-        break;
+
+    $table_join_requirements = [
+      [ // Organization Tables
+        "required_tables" => ["ROL", "O", "OA"],
+        "join_rule" => $orgJoinAdd
+      ],
+      [ // Subject Tables
+        "required_tables" => ["RSUB", "GDLINK"],
+        "join_rule" => "LEFT JOIN ResourceSubject RSUB ON R.resourceID = RSUB.resourceID
+                        LEFT JOIN GeneralDetailSubjectLink GDLINK ON RSUB.generalDetailSubjectLinkID = GDLINK.generalDetailSubjectLinkID"
+      ],
+      [ // Related Resource PARENT Tables
+        "required_tables" => ["RRP", "RP"],
+        "join_rule" => "LEFT JOIN ResourceRelationship RRP ON RRP.resourceID = R.resourceID
+                        LEFT JOIN Resource RP ON RP.resourceID = RRP.relatedResourceID"
+      ],
+      [ // Related Resource CHILD Tables
+        "required_tables" => ["RRC", "RC"],
+        "join_rule" => "LEFT JOIN ResourceRelationship RRC ON RRC.relatedResourceID = R.resourceID
+                        LEFT JOIN Resource RC ON RC.resourceID = RRC.resourceID"
+      ]
+    ];
+    foreach ($table_join_requirements as $table_join) {
+      foreach ($table_join["required_tables"] as $table) {
+        if (in_array($table, $referenced_tables)) {
+          $additional_joins[] = $table_join["join_rule"];
+          break;
+        }
       }
     }
 
