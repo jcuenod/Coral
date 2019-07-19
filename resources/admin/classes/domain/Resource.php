@@ -783,7 +783,7 @@ class Resource extends DatabaseObject {
         LEFT JOIN $dbName.Alias OA ON OA.organizationID = ROL.organizationID";
 
     }else{
-      $orgJoinAdd = "  
+      $orgJoinAdd = "
         LEFT JOIN ResourceOrganizationLink ROL ON R.resourceID = ROL.resourceID
         LEFT JOIN Organization O ON O.organizationID = ROL.organizationID";
     }
@@ -819,8 +819,8 @@ class Resource extends DatabaseObject {
 
     $table_matches = array();
 
-  // Build a list of tables that are referenced by the select and where statements in order to limit the number of joins performed in the search.
-  $table_matching_regex = "/\b[A-Z]+(?=[.][A-Z]+)/iu";
+    // Build a list of tables that are referenced by the select and where statements in order to limit the number of joins performed in the search.
+    $table_matching_regex = "/\b[A-Z]+(?=[.][A-Z]+)/iu";
     preg_match_all($table_matching_regex, $select, $table_matches);
     $referenced_tables_select = array_unique($table_matches[0]);
 
