@@ -984,8 +984,7 @@ class Resource extends DatabaseObject {
       $dbName = $config->settings->organizationsDatabaseName;
       $orgJoinAdd = "
   LEFT JOIN $dbName.Organization O ON O.organizationID = ROL.organizationID
-  LEFT JOIN $dbName.Alias OA ON OA.organizationID = ROL.organizationID
-";
+  LEFT JOIN $dbName.Alias OA ON OA.organizationID = ROL.organizationID";
       $orgSelectAdd = "  GROUP_CONCAT(DISTINCT O.name ORDER BY O.name DESC SEPARATOR '; ') organizationNames,";
     }else{
       $orgJoinAdd = "  LEFT JOIN Organization O ON O.organizationID = ROL.organizationID";
@@ -1002,8 +1001,7 @@ class Resource extends DatabaseObject {
   LEFT JOIN ResourceLicenseLink RLL ON RLL.resourceAcquisitionID = RA.resourceAcquisitionID
   LEFT JOIN $dbName.License L ON RLL.licenseID = L.licenseID
   LEFT JOIN ResourceLicenseStatus RLS ON RLS.resourceAcquisitionID = RA.resourceAcquisitionID
-  LEFT JOIN LicenseStatus LS ON LS.licenseStatusID = RLS.licenseStatusID
-";
+  LEFT JOIN LicenseStatus LS ON LS.licenseStatusID = RLS.licenseStatusID";
       $date_format_to_use = return_date_format();
       $licSelectAdd = "
   GROUP_CONCAT(DISTINCT L.shortName ORDER BY L.shortName DESC SEPARATOR '; ') licenseNames,
@@ -1013,8 +1011,7 @@ class Resource extends DatabaseObject {
       ': ',
       DATE_FORMAT(RLS.licenseStatusChangeDate, '$date_format_to_use')
     ORDER BY RLS.licenseStatusChangeDate DESC SEPARATOR '; '
-  ) licenseStatuses,
-";
+  ) licenseStatuses,";
     }
 
 
@@ -1047,8 +1044,7 @@ class Resource extends DatabaseObject {
     FROM ResourceNote RN
     LEFT JOIN NoteType NT ON RN.noteTypeID = NT.noteTypeID
     GROUP BY entityID
-  ) Notes ON Notes.resourceID = R.resourceID
-";
+  ) Notes ON Notes.resourceID = R.resourceID";
     }
 
     $table_matches = [];

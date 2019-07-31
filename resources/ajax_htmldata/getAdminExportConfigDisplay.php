@@ -28,8 +28,7 @@ $config = $exportConfig->getRawConfiguration();
       <td>
         <input type='checkbox' onclick='javascript:updateExportConfig({$option['ID']})' {$checked} />
       </td>
-    </tr>
-";
+    </tr>";
   }
 
   ?>
