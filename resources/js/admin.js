@@ -844,14 +844,31 @@ function deleteImportConfig(className, deleteID){
         });
     }
 }
+const timeouts = {}
+const setHideStatusTimeout = $statusCell => {
+  const id = $statusCell.closest("tr").attr("id")
+  try {
+    window.clearTimeout(timeouts[id])
+  } catch(e){}
+  timeouts[id] = window.setTimeout(() => {
+   $statusCell.find("span").fadeOut()
+  }, 2500)
+}
 function updateExportConfig(id) {
-  const newValue = this.event.target.checked
+  const el = this.event.target
+
+  const $statusCell = $(el).closest("td").next()
+  $statusCell.html("...")
+
+  const newValue = el.checked
   $.ajax({
     type:    "POST",
     url:     "ajax_processing.php?action=updateExportConfig",
     cache:   false,
     data:    { 'id': id , 'enabled': newValue ? 1 : 0 },
     success: function(html) {
+      $statusCell.html($("<span>saved</span>").css("color", "green"))
+      setHideStatusTimeout($statusCell)
       /* We could do something (like communicate to the user
        * that we're done and the setting is saved) but there
        * is very little riding on this successfully returning.
