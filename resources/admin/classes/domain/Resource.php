@@ -978,10 +978,10 @@ class Resource extends DatabaseObject {
 
     if ($config->settings->organizationsModule == 'Y') {
       $dbName = $config->settings->organizationsDatabaseName;
-      $orgJoinAdd = <<<EOF
+      $orgJoinAdd = "
   LEFT JOIN $dbName.Organization O ON O.organizationID = ROL.organizationID
   LEFT JOIN $dbName.Alias OA ON OA.organizationID = ROL.organizationID
-EOF;
+";
       $orgSelectAdd = "  GROUP_CONCAT(DISTINCT O.name ORDER BY O.name DESC SEPARATOR '; ') organizationNames,";
     }else{
       $orgJoinAdd = "  LEFT JOIN Organization O ON O.organizationID = ROL.organizationID";
@@ -994,14 +994,14 @@ EOF;
     if ($config->settings->licensingModule == 'Y') {
       $dbName = $config->settings->licensingDatabaseName;
 
-      $licJoinAdd = <<<EOF
+      $licJoinAdd = "
   LEFT JOIN ResourceLicenseLink RLL ON RLL.resourceAcquisitionID = RA.resourceAcquisitionID
   LEFT JOIN $dbName.License L ON RLL.licenseID = L.licenseID
   LEFT JOIN ResourceLicenseStatus RLS ON RLS.resourceAcquisitionID = RA.resourceAcquisitionID
   LEFT JOIN LicenseStatus LS ON LS.licenseStatusID = RLS.licenseStatusID
-EOF;
+";
       $date_format_to_use = return_date_format();
-      $licSelectAdd = <<<EOF
+      $licSelectAdd = "
   GROUP_CONCAT(DISTINCT L.shortName ORDER BY L.shortName DESC SEPARATOR '; ') licenseNames,
   GROUP_CONCAT(
     DISTINCT
@@ -1010,7 +1010,7 @@ EOF;
       DATE_FORMAT(RLS.licenseStatusChangeDate, '$date_format_to_use')
     ORDER BY RLS.licenseStatusChangeDate DESC SEPARATOR '; '
   ) licenseStatuses,
-EOF;
+";
     }
 
 
@@ -1022,7 +1022,7 @@ EOF;
     $notesJoinAdd = "";
     if ($exportConfig['Notes']) {
       $notesSelectAdd = "  Notes.notes_json notes,";
-      $notesJoinAdd = <<<EOF
+      $notesJoinAdd = "
   LEFT JOIN (
     SELECT
       entityID as resourceID,
@@ -1044,7 +1044,7 @@ EOF;
     LEFT JOIN NoteType NT ON RN.noteTypeID = NT.noteTypeID
     GROUP BY entityID
   ) Notes ON Notes.resourceID = R.resourceID
-EOF;
+";
     }
 
     $table_matches = [];
@@ -1106,7 +1106,7 @@ EOF;
 
 
     //now actually execute query
-    $query = <<<EOF
+    $query = "
 SELECT
   R.resourceID,
   R.titleText,
@@ -1225,7 +1225,7 @@ GROUP BY
 
 ORDER BY
   $orderBy
-EOF;
+";
 
     // This was determined by trial and error
     $CHUNK_SIZE = 10000;
