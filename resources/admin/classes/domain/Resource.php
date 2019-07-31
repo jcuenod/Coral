@@ -856,6 +856,10 @@ class Resource extends DatabaseObject {
       }
     }
 
+	// Technically this is not the most efficient solution:
+	// e.g. if RRP is needed but R is not, this solution will still do both joins,
+	// these seem like rare enough edge cases (which involve expected slowdown in
+	// the query anyway) that it's not worth cluttering up this code further.
     $table_join_requirements = [
       [ // Organization Tables
         "required_tables" => ["ROL", "O", "OA"],
