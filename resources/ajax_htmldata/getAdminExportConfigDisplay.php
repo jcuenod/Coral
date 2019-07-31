@@ -16,7 +16,7 @@ $config = $exportConfig->getRawConfiguration();
   <tr>
   <th width="100%"><?php echo _("Include in Export");?></th>
   <th><?php echo _("Enabled");?></th>
-  <th><span style="opacity: 0">saved</span></th>
+  <th><span style="visibility: hidden" aria-hidden="true">saved</span></th>
   </tr>
   <?php
 
