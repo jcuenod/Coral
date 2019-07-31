@@ -110,8 +110,6 @@ $columns = [
   ["header" => _("OCLC Holdings Updated"),         "sqlColumn" => "hasOclcHoldings",             "getValueFromRow" => function($r) { return ($r['hasOclcHoldings'] ? 'Y' : 'N'); }],
   ["header" => _("Notes"),                         "sqlColumn" => "notes",                       "getValueFromRow" => function($r) { return $r['notes']; }]
 ];
-// var_dump($resourceArray[0]);
-// exit();
 $availableColumns = array_filter($columns, function($c) use ($resourceArray) {
   return array_key_exists($c["sqlColumn"], $resourceArray[0]);
 });
