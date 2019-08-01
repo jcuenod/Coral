@@ -869,10 +869,8 @@ function updateExportConfig(id) {
     success: function(html) {
       $statusCell.html($("<span>saved</span>").css("color", "green"))
       setHideStatusTimeout($statusCell)
-      /* We could do something (like communicate to the user
-       * that we're done and the setting is saved) but there
-       * is very little riding on this successfully returning.
-       */
+      // Technically, we aren't accounting for the possibility
+      // that the save fails but there is very little riding on this.
     }
   });
 }
