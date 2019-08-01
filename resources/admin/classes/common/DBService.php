@@ -86,16 +86,7 @@ class DBService extends Base_Object {
     }
 
 	public function processQuery($sql, $type = NULL) {
-		// BENCHMARK QUERY
-		//$date = (new DateTime('NOW'))->format("Y-m-d h:i:s");
-		//$message = $date . "\n" . $sql . "\n";
-		//$starttime = microtime(true);
-		// DO ACTUAL QUERY
 		$result = $this->db->query($sql);
-		// BACK TO BENCHMARKING NONSENSE
-		//$totaltime = microtime(true) - $starttime;
-		//$message .= "completed: $totaltime\n\n";
-		//error_log($message, 3, '/tmp/php_benchmarking.log');
 
 		$this->checkForError();
 		$data = array();
