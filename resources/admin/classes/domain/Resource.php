@@ -1022,7 +1022,9 @@ class Resource extends DatabaseObject {
     $notesSelectAdd = "";
     $notesJoinAdd = "";
     if ($exportConfig['Notes']) {
-      $notesSelectAdd = "  Notes.notes_json notes,";
+      $notesSelectAdd = "
+  ResourceNotes.notes_json resourceNotes,
+  AcquisitionNotes.notes_json acquisitionNotes,";
       $notesJoinAdd = "
   LEFT JOIN (
     SELECT
@@ -1044,11 +1046,34 @@ class Resource extends DatabaseObject {
     FROM ResourceNote RN
     LEFT JOIN NoteType NT ON RN.noteTypeID = NT.noteTypeID
     GROUP BY entityID
-  ) Notes ON Notes.resourceID = R.resourceID";
+  ) ResourceNotes ON ResourceNotes.resourceID = R.resourceID
+  /* NOTE: NEEDS JOIN to ResourceAcquisition RA */
+  LEFT JOIN (
+    SELECT
+      entityID as resourceID,
+      CONCAT(
+        '[',
+        GROUP_CONCAT(
+          CONCAT(
+            '{\n  note_type:', QUOTE(NT.shortName),
+            ',\n  tab_name:', QUOTE(RN.tabName),
+            ',\n  note_text:', QUOTE(RN.noteText),
+            ',\n  update_login_id:', QUOTE(RN.updateLoginID),
+            ',\n  update_date:', QUOTE(RN.updateDate),
+            '\n}'
+          ) SEPARATOR ',\n'
+        ),
+        ']'
+      ) AS notes_json
+    FROM ResourceNote RN
+    LEFT JOIN NoteType NT ON RN.noteTypeID = NT.noteTypeID
+    GROUP BY entityID
+  ) AcquisitionNotes ON AcquisitionNotes.resourceID = RA.resourceAcquisitionID";
     }
 
     $table_matches = [];
 
+    $joinsForTablesInWhere = "";
     preg_match_all("/\b[A-Z]+(?=[.][A-Z]+)/iu", implode(" ", $whereAdd), $table_matches);
     $tables_referenced_in_where = array_unique($table_matches[0]);
 
@@ -1198,6 +1223,7 @@ $childResourcesJoinAdd
   LEFT JOIN IsbnOrIssn I ON I.resourceID = R.resourceID
 $licJoinAdd
 $notesJoinAdd
+$joinsForTablesInWhere
 
 $whereStatement
 

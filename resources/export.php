@@ -108,7 +108,8 @@ $columns = [
   ["header" => _("Catalog Records Available"),     "sqlColumn" => "numberRecordsAvailable",      "getValueFromRow" => function($r) { return $r['numberRecordsAvailable']; }],
   ["header" => _("Catalog Records Loaded"),        "sqlColumn" => "numberRecordsLoaded",         "getValueFromRow" => function($r) { return $r['numberRecordsLoaded']; }],
   ["header" => _("OCLC Holdings Updated"),         "sqlColumn" => "hasOclcHoldings",             "getValueFromRow" => function($r) { return ($r['hasOclcHoldings'] ? 'Y' : 'N'); }],
-  ["header" => _("Notes"),                         "sqlColumn" => "notes",                       "getValueFromRow" => function($r) { return $r['notes']; }]
+  ["header" => _("Resource Notes"),                "sqlColumn" => "resourceNotes",               "getValueFromRow" => function($r) { return $r['resourceNotes']; }],
+  ["header" => _("Acquisition Notes"),             "sqlColumn" => "acquisitionNotes",            "getValueFromRow" => function($r) { return $r['acquisitionNotes']; }]
 ];
 $availableColumns = array_filter($columns, function($c) use ($resourceArray) {
   return array_key_exists($c["sqlColumn"], $resourceArray[0]);
