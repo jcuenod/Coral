@@ -1077,6 +1077,14 @@ class Resource extends DatabaseObject {
     preg_match_all("/\b[A-Z]+(?=[.][A-Z]+)/iu", implode(" ", $whereAdd), $table_matches);
     $tables_referenced_in_where = array_unique($table_matches[0]);
 
+
+    if (in_array("RNA", $tables_referenced_in_where)) {
+      $joinsForTablesInWhere .= "\nLEFT JOIN ResourceNote RNA ON RA.resourceAcquisitionID = RNA.entityID";
+    }
+    if (in_array("RNR", $tables_referenced_in_where)) {
+      $joinsForTablesInWhere .= "\nLEFT JOIN ResourceNote RNR ON R.resourceID = RNR.entityID";
+    }
+
     // PARENT RELATIONSHIPS
     $parentResourcesSelectAdd = "";
     $parentResourcesJoinAdd = "";
