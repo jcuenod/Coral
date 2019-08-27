@@ -1137,6 +1137,12 @@ class Resource extends DatabaseObject {
 
     $whereStatement = "WHERE " . implode(" AND ", $whereAdd);
 
+    if (!empty(trim($orderBy))) {
+      $orderBy = "ORDER BY $orderBy";
+    }
+    else {
+      $orderBy = ""
+    }
 
     //now actually execute query
     $query = "
@@ -1257,8 +1263,7 @@ GROUP BY
   RA.numberRecordsLoaded,
   RA.hasOclcHoldings
 
-ORDER BY
-  $orderBy
+$orderBy
 ";
 
     // This was determined by trial and error
