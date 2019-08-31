@@ -184,9 +184,10 @@ $(".newSearch").click(function () {
   $('#resourceSearchForm input[type=text]').val("");
   $('#resourceSearchForm select').val("");
 
-
   //reset startwith background color
   $("span.searchLetterSelected").removeClass('searchLetterSelected').addClass('searchLetter');
+  //reset default sorting field
+  setOrder('R.titleText', 'ASC')
   updateSearch();
 });
 
