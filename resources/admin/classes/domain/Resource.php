@@ -1141,7 +1141,7 @@ class Resource extends DatabaseObject {
       $orderBy = "ORDER BY $orderBy";
     }
     else {
-      $orderBy = ""
+      $orderBy = "";
     }
 
     //now actually execute query
