@@ -16,7 +16,7 @@ $config = $exportConfig->getRawConfiguration();
   <tr>
   <th width="100%"><?php echo _("Include in Export");?></th>
   <th><?php echo _("Enabled");?></th>
-  <th><span style="visibility: hidden" aria-hidden="true">saved</span></th>
+  <th><span style="visibility: hidden" aria-hidden="true">saving...</span></th>
   </tr>
   <?php
 
@@ -27,7 +27,7 @@ $config = $exportConfig->getRawConfiguration();
     <tr id='{$option['shortName']}'>
       <td>{$translatedName}</td>
       <td>
-        <input type='checkbox' onclick='javascript:updateExportConfig({$option['ID']})' {$checked} />
+        <input type='checkbox' onclick='javascript:updateExportConfig(this, {$option['ID']})' {$checked} />
       </td>
       <td>
       </td>

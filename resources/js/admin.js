@@ -854,25 +854,26 @@ const setHideStatusTimeout = $statusCell => {
    $statusCell.find("span").fadeOut()
   }, 2500)
 }
-function updateExportConfig(id) {
-  const el = this.event.target
-
+function updateExportConfig(el, id) {
   const $statusCell = $(el).closest("td").next()
-  $statusCell.html("...")
+  $statusCell.html("saving...")
 
   const newValue = el.checked
-  $.ajax({
+  const jqXhr = $.ajax({
     type:    "POST",
     url:     "ajax_processing.php?action=updateExportConfig",
     cache:   false,
     data:    { 'id': id , 'enabled': newValue ? 1 : 0 },
-    success: function(html) {
+	success: html => {
       $statusCell.html($("<span>saved</span>").css("color", "green"))
       setHideStatusTimeout($statusCell)
       // Technically, we aren't accounting for the possibility
       // that the save fails but there is very little riding on this.
-    }
-  });
+    },
+    error: e => {
+      $statusCell.html($("<span>fail</span>").css("color", "red"))
+	}
+  })
 }
 
 function archiveFund(isChecked, fundID, fundCode, shortName) {
